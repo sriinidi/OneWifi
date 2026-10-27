@@ -1472,7 +1472,6 @@ int push_subdoc_to_one_wifidb(uint8_t subdoc)
 {
     webconfig_subdoc_data_t *data = NULL;
     char *str = NULL;
-    int ret;
 
     data = (webconfig_subdoc_data_t *)malloc(sizeof(webconfig_subdoc_data_t));
     if (data == NULL) {
@@ -1488,17 +1487,10 @@ int push_subdoc_to_one_wifidb(uint8_t subdoc)
     if (webconfig_encode(&webconfig_dml.webconfig, data, subdoc) == webconfig_error_none) {
         str = data->u.encoded.raw;
         wifi_util_info_print(WIFI_DMCLI, "%s:  VAP DML cache encoded successfully  \n", __FUNCTION__);
-        ret = push_event_to_ctrl_queue(str, strlen(str), wifi_event_type_webconfig,
-            wifi_event_webconfig_set_data_dml, NULL);
-        if (ret != RETURN_OK) {
-            wifi_util_error_print(WIFI_DMCLI,
-                "%s:%d: Failed to push subdoc:%u to ctrl queue ret:%d\n", __func__, __LINE__,
-                subdoc, ret);
-        }
+        push_event_to_ctrl_queue(str, strlen(str), wifi_event_type_webconfig, wifi_event_webconfig_set_data_dml, NULL);
     } else {
         wifi_util_error_print(WIFI_DMCLI, "%s:%d: Webconfig set failed, update data from ctrl queue\n", __func__, __LINE__);
         request_for_dml_data_resync();
-        ret = RETURN_ERR;
     }
 
     wifi_util_info_print(WIFI_DMCLI, "%s:  VAP DML cache pushed to queue \n", __FUNCTION__);
@@ -1507,7 +1499,7 @@ int push_subdoc_to_one_wifidb(uint8_t subdoc)
     free(data);
     data = NULL;
 
-    return ret;
+    return RETURN_OK;
 }
 int push_factory_reset_to_ctrl_queue()
 {
@@ -1549,7 +1541,6 @@ int push_rfc_dml_cache_to_one_wifidb(bool rfc_value,wifi_event_subtype_t rfc)
 
 int push_vap_dml_cache_to_one_wifidb()
 {
-    int ret = RETURN_OK;
 
     if(is_vap_config_changed == FALSE)
     {
@@ -1559,52 +1550,31 @@ int push_vap_dml_cache_to_one_wifidb()
 
     if (is_vap_config_changed & PRIVATE) {
         wifi_util_info_print(WIFI_DMCLI, "%s: Subdoc webconfig_subdoc_type_private DML Modified  \n", __FUNCTION__);
-        if (push_subdoc_to_one_wifidb(webconfig_subdoc_type_private) != RETURN_OK) {
-            ret = RETURN_ERR;
-        }
+        push_subdoc_to_one_wifidb(webconfig_subdoc_type_private);
     }
     if (is_vap_config_changed & HOTSPOT) {
         wifi_util_info_print(WIFI_DMCLI, "%s: Subdoc webconfig_subdoc_type_xfinity DML Modified  \n", __FUNCTION__);
-        if (push_subdoc_to_one_wifidb(webconfig_subdoc_type_xfinity) != RETURN_OK) {
-            ret = RETURN_ERR;
-        }
+        push_subdoc_to_one_wifidb(webconfig_subdoc_type_xfinity);
     }
     if (is_vap_config_changed & HOME) {
         wifi_util_info_print(WIFI_DMCLI, "%s: Subdoc webconfig_subdoc_type_home DML Modified  \n", __FUNCTION__);
-        if (push_subdoc_to_one_wifidb(webconfig_subdoc_type_home) != RETURN_OK) {
-            ret = RETURN_ERR;
-        }
+        push_subdoc_to_one_wifidb(webconfig_subdoc_type_home);
     }
     if (is_vap_config_changed & MESH_STA) {
         wifi_util_info_print(WIFI_DMCLI, "%s: Subdoc webconfig_subdoc_type_mesh_sta DML Modified  \n", __FUNCTION__);
-        if (push_subdoc_to_one_wifidb(webconfig_subdoc_type_mesh_sta) != RETURN_OK) {
-            ret = RETURN_ERR;
-        }
+        push_subdoc_to_one_wifidb(webconfig_subdoc_type_mesh_sta);
     }
     if (is_vap_config_changed & MESH_BACKHAUL) {
         wifi_util_info_print(WIFI_DMCLI, "%s: Subdoc webconfig_subdoc_type_mesh_backhaul DML Modified  \n", __FUNCTION__);
-        if (push_subdoc_to_one_wifidb(webconfig_subdoc_type_mesh_backhaul) != RETURN_OK) {
-            ret = RETURN_ERR;
-        }
+        push_subdoc_to_one_wifidb(webconfig_subdoc_type_mesh_backhaul);
     }
     if (is_vap_config_changed & MESH) {
         wifi_util_info_print(WIFI_DMCLI, "%s: Subdoc webconfig_subdoc_type_mesh DML Modified  \n", __FUNCTION__);
-        if (push_subdoc_to_one_wifidb(webconfig_subdoc_type_mesh) != RETURN_OK) {
-            ret = RETURN_ERR;
-        }
+        push_subdoc_to_one_wifidb(webconfig_subdoc_type_mesh);
     }
     if (is_vap_config_changed & LNF) {
         wifi_util_info_print(WIFI_DMCLI, "%s: Subdoc webconfig_subdoc_type_lnf DML Modified  \n", __FUNCTION__);
-        if (push_subdoc_to_one_wifidb(webconfig_subdoc_type_lnf) != RETURN_OK) {
-            ret = RETURN_ERR;
-        }
-    }
-
-    if (ret != RETURN_OK) {
-        wifi_util_error_print(WIFI_DMCLI,
-            "%s:%d: One or more vap DML subdoc pushes failed, retaining dirty state\n", __func__,
-            __LINE__);
-        return ret;
+        push_subdoc_to_one_wifidb(webconfig_subdoc_type_lnf);
     }
 
     wifi_util_info_print(WIFI_DMCLI, "%s:  VAP DML cache pushed to queue \n", __FUNCTION__);
